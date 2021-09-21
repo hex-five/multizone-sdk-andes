@@ -1,2 +1,223 @@
 # multizone-sdk-andes
-MultiZone® Security TEE for Andes N22/AE250
+MultiZone® Security TEE for Andes RISC-V processors
+
+**MultiZone® Security** is the quick and safe way to add security and separation to RISC-V processors. MultiZone software can retrofit existing designs. If you don’t have TrustZone-like hardware, or if you require finer granularity than one secure world, you can take advantage of high security separation without the need for hardware and software redesign, eliminating the complexity associated with managing a hybrid hardware/software security scheme. RISC-V standard ISA doesn't define TrustZone-like primitives to provide hardware separation. To shield critical functionality from untrusted third-party components, MultiZone provides hardware-enforced, software-defined separation of multiple equally secure worlds. Unlike antiquated hypervisor-like solutions, MultiZone is self-contained, presents an extremely small attack surface, and it is policy driven, meaning that no coding is required – and in fact even allowed.
+
+MultiZone works with any 32-bit or 64-bit RISC-V processors with standard Physical Memory Protection unit (PMP) and “U” mode.
+
+This release of the MultiZone SDK supports the following development boards:
+- [Digilent Arty A7 Development Board (Xilinx Artix-7 FPGA)](https://digilent.com/shop/arty-a7-artix-7-fpga-development-board/)
+- [Andes Corvette-F1 R1.0 (Xilinx Artix-7 FPGA)](http://www.andestech.com/en/products-solutions/andeshape-platforms/corvette-f1-r1/)
+- [Microchip Icicle Kit (PolarFire SoC)](https://www.microsemi.com/existing-parts/parts/152514)
+- [SiFive HiFive1 Rev B (Freedom E310 SoC)](https://www.sifive.com/boards/hifive1-rev-b)
+- [SiFive Unleashed (Freedom U540 SoC)](https://www.sifive.com/boards/hifive-unleashed)
+
+This repository is for the Andes Corvette-F1 R1 (N22/AE250).
+
+### MultiZone SDK Installation ###
+
+The MultiZone SDK works with any versions of Linux, Windows, and Mac capable of running Java 1.8 or greater. The directions in this readme have been verified with fresh installations of Ubuntu 20.04, Ubuntu 19.10, Ubuntu 18.04.5, and Debian 10.5. Other Linux distros are similar. Windows developers may want to install a Linux emulation environment like Cygwin or run the SDK in a Linux VM guest (2GB Disk, 2GB Ram)
+
+**Linux prerequisites**
+
+```
+sudo apt update
+sudo apt install make default-jre gtkterm libhidapi-dev libftdi1-2
+```
+Ubuntu 18.04 LTS additional dependency
+```
+sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu/ focal main universe"
+sudo apt update
+sudo apt install libncurses-dev
+```
+Note: GtkTerm is optional and required only to connect to the reference application via UART. It is not required to build, debug, and load the MultiZone software. Any other serial terminal application of choice would do.
+
+**GNU RISC-V Toolchain**
+
+Hex Five reference build: RISC-V GNU Toolchain Linux 64-bit August 07, 2021
+```
+cd ~
+wget https://hex-five.com/wp-content/uploads/riscv-gnu-toolchain-20210807.tar.gz
+tar -xvf riscv-gnu-toolchain-20210807.tar.gz
+```
+
+**OpenOCD on-chip debugger**
+
+Hex Five reference build: RISC-V OpenOCD Linux 64-bit August 07, 2021
+```
+cd ~
+wget https://hex-five.com/wp-content/uploads/riscv-openocd-20210807.tar.gz
+tar -xvf riscv-openocd-20210807.tar.gz
+```
+Note: the SiFive HiFive1 board doesn't support OpenOCD and requires the Segger propietary package JLink_Linux_V694_x86_64.deb downloadable at [https://www.segger.com/downloads/jlink/](https://www.segger.com/downloads/jlink/). 
+
+**Linux USB udev rules**
+
+```
+sudo vi /etc/udev/rules.d/99-openocd.rules# ANDES TECHNOLOGY CORPORATION - Corvette F1 [CON1]
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1cfc",ATTRS{idProduct}=="0000", MODE="664", GROUP="plugdev"
+SUBSYSTEM=="usb", ATTR{idVendor} =="1cfc",ATTR{idProduct} =="0000", MODE="664", GROUP="plugdev"
+```
+A reboot may be necessary for these changes to take effect.
+
+**MultiZone Security SDK**
+
+```
+cd ~
+git clone https://github.com/hex-five/multizone-sdk.git
+
+```
+
+
+### Build & load the MultiZone reference application ###
+
+Connect the target board to the development workstation as indicated in the user manual.
+
+'ls multizone-sdk/bsp' shows the list of supported targets: N22-ILM N22-FLASH.
+
+Assign one of these values to the BOARD variable - default target is N22-ILM.
+
+```
+cd ~/multizone-sdk
+export RISCV=~/riscv-gnu-toolchain-20210807
+export OPENOCD=~/riscv-openocd-20210807
+export BOARD=N22-ILM
+make 
+make load
+```
+
+Note: the N22-FLASH target requires Andes flash programmer software.
+
+
+### Run the MultiZone reference application ###
+
+Connect the CON2 UART port as indicated in the Corvette-F1 user manual.
+
+On your computer, start a serial terminal console (GtkTerm) and connect to /dev/ttyUSB1 at 115200-8-N-1
+
+Hit the enter key a few times until the cursor 'Z1 >' appears on the screen
+
+Enter 'restart' to display the splash screen
+
+Hit enter again to show the list of available commands
+
+```
+=====================================================================
+                       Hex Five MultiZone® Security                    
+    Copyright© 2020 Hex Five Security, Inc. - All Rights Reserved    
+=====================================================================
+This version of MultiZone® Security is meant for evaluation purposes 
+only. As such, use of this software is governed by the Evaluation    
+License. There may be other functional limitations as described in   
+the evaluation SDK documentation. The commercial version of the      
+software does not have these restrictions.                           
+=====================================================================
+Machine ISA   : 0x40901105 RV32 ACIMUX 
+Vendor        : 0x0000031e Andes Technology 
+Architecture  : 0x80000022 N22 
+Implementation: 0x00000130 
+Hart id       : 0x0 
+CPU clock     : 20 MHz 
+RTC clock     : 20 MHz 
+ 
+CLIC @0xe2000000 
+DMAC @0xe0e00000 
+UART @0xf0300000 
+GPIO @0xf0700000 
+
+Z1 > Commands: yield send recv pmp load store exec stats timer restart dma
+```
+
+
+### Optional: Eclipse CDT Project ###
+This repository includes an optional Eclipse CDT project for developers familiar with this IDE. No additional plugins are required to build and upload MultiZone to the target. The [OpenOCD debugging plug-in](https://eclipse-embed-cdt.github.io/debug/openocd) is optional and recommended.
+
+**Eclipse project Setup**
+
+File > Open Projects from File System > Import source: ~/multizone-sdk
+
+Project > Properties > C/C++ Build > Environment: set RISCV and OPENOCD variables according to your installation
+
+![alt text](https://hex-five.com/wp-content/uploads/multizone-eclipse-proj.png)
+
+
+### Optional: FreeRTOS Example ###
+No additional software dependencies are required to run MultiZone-based applications. To ease the integration of the MultiZone TEE with legacy applications based on the popular FreeRTOS operating system, the MultiZone SDK includes an optional zone3.1 running FreeRTOS 10.4.0. Its functionality is identical to the one of the original zone3 that controls the robot, but it is implemented as a typical FreeRTOS applications with four tasks and one interrupt handler.
+
+**Installation**
+
+```
+cd ~/multizone-sdk
+git submodule update --init --recursive
+git apply -p1 ext/freertos.patch --directory=ext/freertos
+```
+
+**Setup**
+
+Edit multizone-sdk/Makefile and change the two references to "zone3" into "zone3.1" :
+
+```
+...
+
+.PHONY: all 
+all: clean
+    $(MAKE) -C zone1
+    $(MAKE) -C zone2
+    $(MAKE) -C zone3
+    $(MAKE) -C zone3.1
+    $(MAKE) -C zone4
+    $(MAKE) -C bsp/$(BOARD)/boot
+
+    java -jar multizone.jar \
+        --arch $(BOARD) \
+        --config bsp/$(BOARD)/multizone.cfg \
+        --boot bsp/$(BOARD)/boot/boot.hex \
+        zone1/zone1.hex \
+        zone2/zone2.hex \
+        zone3.1/zone3.hex \
+        zone4/zone4.hex
+
+...    
+```
+Build and load to flash with the commands “make” and “make load”.
+
+Note: to activate MultiZone deep-sleep suspend, set configUSE_TICKLESS_IDLE 1 and configUSE_IDLE_HOOK 0 in ext/FreeRTOSConfig.h. This enables Hex Five’s optimized implementation of the FreeRTOS vPortSuppressTicksAndSleep() that takes full advantage of the RISC-V instruction wfi.
+
+
+### MultiZone TEE Technical Specs ###
+| |
+|---|
+| Up to 4 hardware threads (zones) hardware-enforced, software-defined                  |
+| Up to 8 memory mapped resources per zone – i.e. flash, ram, rom, i/o, etc.            |
+| Scheduler: preemptive, cooperative, round robin, configurable tick or tickless        |
+| Secure interzone communications based on messages – no shared memory                  |
+| Built-in support for secure shared Timer interrupt                                    |
+| Built-in support for secure shared PLIC interrupt                                     |
+| Built-in support for secure DMA transfers                                             |
+| Built-in support for CLIC, CLINT, and PLIC interrupt controllers                      |
+| Built-in trap & emulation for all privileged instructions – csrr, csrw, ecall, etc.   |
+| Support for secure user-mode interrupt handlers mapped to zones – up to 32/64 sources |
+| Support for CPU deep-sleep suspend mode for low power applications - wfi              |
+| Formally verifiable runtime ~4KB, 100% written in assembly, no 3rd-party dependencies |
+| C macro wrappers for protected mode execution – optional for high speed low-latency   |
+| Hardware requirements: RV32, RV32e, RV64 cpu with Memory Protection Unit and 'U' mode | 
+| System requirements: 8KB FLASH, 4KB ITIM, 2KB DTIM - CPU overhead < 0.01%             | 
+| Development environment: any versions of Linux, Windows, Mac running Java 1.8 or newer|
+
+
+### Additional Resources ###
+
+- [MultiZone Reference Manual](http://github.com/hex-five/multizone-sdk/blob/master/manual.pdf)
+- [MultiZone Datasheet](https://hex-five.com/wp-content/uploads/2020/01/multizone-datasheet-20200109.pdf)
+- [MultiZone Website](https://hex-five.com/multizone-security-sdk/)
+- [Frequently Asked Questions](http://hex-five.com/faq/)
+- [Contact Hex Five http://hex-five.com/contact](http://hex-five.com/contact)
+
+
+### Legalities ###
+
+Please remember that export/import and/or use of strong cryptography software, providing cryptography hooks, or even just communicating technical details about cryptography software is illegal in some parts of the world. So when you import this software to your country, re-distribute it from there or even just email technical suggestions or even source patches to the authors or other people you are strongly advised to pay close attention to any laws or regulations which apply to you. Hex Five Security, Inc. and the authors of the software included in this repository are not liable for any violations you make here. So be careful, it is your responsibility.
+
+MultiZone and HEX-Five are registered trademarks of Hex Five Security, Inc.
+
+MultiZone technology is patent pending US 16450826, PCT US1938774.

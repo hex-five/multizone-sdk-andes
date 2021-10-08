@@ -24,7 +24,7 @@ __attribute__((interrupt())) void trp_handler(void)	 { // trap handler (0)
 	case 8:	break; // Environment call from U-mode
 	}
 
-	for( ;; );
+	for(;;);
 
 }
 __attribute__((interrupt())) void msi_handler(void)  { // machine software interrupt (3)
@@ -73,7 +73,7 @@ int main (void){
 	trap_vect[0] = trp_handler;
 	trap_vect[3] = msi_handler;
 	trap_vect[7] = tmr_handler;
-	trap_vect[25] = gpio_handler;
+	trap_vect[GPIO_IRQ] = gpio_handler;
 	CSRW(mtvec, trap_vect);
 	CSRS(mtvec, 0x1);
 

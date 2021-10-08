@@ -10,6 +10,7 @@
 // RTC (CLINT)
 // -----------------------------------------------------------------------------
 #define CLINT_BASE	0xE6000000
+
 #define CLINT_MTIMECMP  0x0008
 #define CLINT_MTIME	    0x0000
 
@@ -45,6 +46,8 @@
 #define DMA_TR_DEST		0x4C /* +ch*0x14 */
 #define DMA_TR_SIZE		0x50 /* +ch*0x14 */
 
+#define DMA_IRQ			28
+
 // -----------------------------------------------------------------------------
 // UART2 - Andes ATCUART100
 // -----------------------------------------------------------------------------
@@ -66,6 +69,8 @@
 #define UART_THR 			0x20	// Transmitter Holding Register (when DLAB = 0) (0x20)
 #define UART_RBR 			0x20	// Receiver Buffer Register (when DLAB = 0) (0x20)
 
+#define UART_IRQ		27
+
 // -----------------------------------------------------------------------------
 // GPIO - Andes ATCGPIO100
 // -----------------------------------------------------------------------------
@@ -78,6 +83,8 @@
 #define GPIO_INT_STATUS		0x64	// 3.2.12. Interrupt Status Register (Offset 0x64)
 #define GPIO_DEBOUNCE_EN 	0x70	// 3.2.13. De-bounce Enable Register (Offset 0x70)
 #define GPIO_DEBOUNCE_CTRL 	0x74	// 3.2.14. De-bounce Control Register (Offset 0x74)
+
+#define GPIO_IRQ    25
 
 // -----------------------------------------------------------------------------
 // SMU - Andes AE250 System Management Unit

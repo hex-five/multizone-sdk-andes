@@ -376,7 +376,9 @@
 		<configuration configurationName="N22-ILM">
 			<resource resourceType="PROJECT" workspacePath="/multizone-sdk"/>
 		</configuration>
-		<configuration configurationName="N22-FLASH"/>
+		<configuration configurationName="N22-FLASH">
+			<resource resourceType="PROJECT" workspacePath="/multizone-sdk-andes"/>
+		</configuration>
 		<configuration configurationName="FE310">
 			<resource resourceType="PROJECT" workspacePath="/multizone-sdk"/>
 		</configuration>

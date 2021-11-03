@@ -79,7 +79,7 @@ Assign one of these values to the BOARD variable - default target is N22-ILM.
 
 ```
 cd ~/multizone-sdk
-export RISCV=~/riscv-gnu-toolchain-20210807
+export RISCV=~/riscv-gnu-toolchain-20210618
 export OPENOCD=~/riscv-openocd-20210807
 export BOARD=N22-ILM
 make 

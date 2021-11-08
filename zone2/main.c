@@ -9,6 +9,7 @@
 static volatile int led = LED1;
 static volatile char msg[16] = {'\0'};
 
+static void (*trap_vect[45+1])(void) = {}; // 15.6 Interr Assignment (CLIC)
 __attribute__((interrupt())) void trp_handler(void)	 { // trap handler (0)
 
 	const unsigned long mcause = MZONE_CSRR(CSR_MCAUSE);
@@ -69,7 +70,6 @@ int main (void){
 	//while(1);
 
 	// vectored trap handler
-	static void (*trap_vect[32])(void) = {};
 	trap_vect[0] = trp_handler;
 	trap_vect[3] = msi_handler;
 	trap_vect[7] = tmr_handler;

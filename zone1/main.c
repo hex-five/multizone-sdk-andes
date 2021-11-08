@@ -32,7 +32,7 @@ int inbox_empty(void){
 }
 
 // ------------------------------------------------------------------------
-static void (*trap_vect[32+128])(void) = {};
+static void (*trap_vect[45+1])(void) = {}; // 15.6 Interr Assignment (CLIC)
 
 __attribute__((interrupt())) void trp_isr(void)  { // nmi traps (0)
 

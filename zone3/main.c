@@ -135,7 +135,7 @@ uint64_t task2(){ // Keep alive 1sec
 	return time + KEEP_ALIVE_TIME;
 }
 
-__attribute__(( interrupt())) void trap_handler(void){
+__attribute__(( interrupt())) void trap_isr(void){
 
 	#define IRQ (1UL << (__riscv_xlen-1))
 
@@ -222,13 +222,9 @@ void msg_handler(const char *msg){
 
 int main (void){
 
-	//while(1) MZONE_WFI();
-	//while(1) MZONE_YIELD();
-	//while(1);
-
 	GPIO_REG(GPIO_OUTPUT_EN) |= ((0x1 << SPI_TCK) | (0x1<< SPI_TDO));
 
-	CSRW(mtvec, trap_handler);  // register trap handler
+    CSRW(mtvec, trap_isr);      // register trap handler
 	CSRS(mie, 1<<3);    		// enable msip/inbox interrupt
 	CSRS(mie, 1<<7); 			// enable timer interrupts
     CSRS(mstatus, 1<<3);		// enable global interrupts

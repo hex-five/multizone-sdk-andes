@@ -9,8 +9,7 @@
 static volatile int led = LED1;
 static volatile char msg[16] = {'\0'};
 
-static void (*trap_vect[45+1])(void) = {}; // 15.6 Interr Assignment (CLIC)
-__attribute__((interrupt())) void trp_handler(void)	 { // trap handler (0)
+__attribute__((interrupt())) void trp_isr(void)	 { // trap handler (0)
 
 	const unsigned long mcause = MZONE_CSRR(CSR_MCAUSE);
 
@@ -28,7 +27,8 @@ __attribute__((interrupt())) void trp_handler(void)	 { // trap handler (0)
 	for(;;);
 
 }
-__attribute__((interrupt())) void msi_handler(void)  { // machine software interrupt (3)
+
+__attribute__((interrupt())) void msi_isr(void)  { // machine software interrupt (3)
 
 	char const tmp[16];
 
@@ -36,7 +36,8 @@ __attribute__((interrupt())) void msi_handler(void)  { // machine software inter
 		memcpy((char *)msg, tmp, sizeof msg);
 
 }
-__attribute__((interrupt())) void tmr_handler(void)  { // machine timer interrupt (7)
+
+__attribute__((interrupt())) void tmr_isr(void)  { // machine timer interrupt (7)
 
 	// togle led
 	BITINV(GPIO_BASE+GPIO_OUTPUT_VAL, led);
@@ -45,7 +46,7 @@ __attribute__((interrupt())) void tmr_handler(void)  { // machine timer interrup
 	MZONE_ADTIMECMP((uint64_t)(RTC_FREQ/1000*1000));
 
 }
-__attribute__((interrupt())) void gpio_handler(void) { // local interrupt (25)
+__attribute__((interrupt())) void gpio_isr(void) { // local interrupt (25)
 
 	// GPIO: read int
 	const uint32_t gpio_int = GPIO_REG(GPIO_INT_STATUS);
@@ -64,18 +65,6 @@ __attribute__((interrupt())) void gpio_handler(void) { // local interrupt (25)
 }
 
 int main (void){
-
-	//while(1) MZONE_WFI();
-	//while(1) MZONE_YIELD();
-	//while(1);
-
-	// vectored trap handler
-	trap_vect[0] = trp_handler;
-	trap_vect[3] = msi_handler;
-	trap_vect[7] = tmr_handler;
-	trap_vect[GPIO_IRQ] = gpio_handler;
-	CSRW(mtvec, trap_vect);
-	CSRS(mtvec, 0x1);
 
 	// GPIO: enable interrupts
 	GPIO_REG(GPIO_INT_STATUS) = 0xFFFFFFFF;
